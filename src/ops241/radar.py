@@ -36,13 +36,13 @@ class Command:
 
     # data precision (F)
     # set the number of digits for the data reported
-    GET_DATA_PRESISION0 = 'F?'
-    SET_DATA_PRESISION0 = 'F0'  # 1
-    SET_DATA_PRESISION1 = 'F1'  # 1.1
-    SET_DATA_PRESISION2 = 'F2'  # 1.11
-    SET_DATA_PRESISION3 = 'F3'  # 1.111
-    SET_DATA_PRESISION4 = 'F4'  # 1.1111
-    SET_DATA_PRESISION5 = 'F5'  # 1.11111
+    GET_DATA_PRECISION0 = 'F?'
+    SET_DATA_PRECISION0 = 'F0'  # 1
+    SET_DATA_PRECISION1 = 'F1'  # 1.1
+    SET_DATA_PRECISION2 = 'F2'  # 1.11
+    SET_DATA_PRECISION3 = 'F3'  # 1.111
+    SET_DATA_PRECISION4 = 'F4'  # 1.1111
+    SET_DATA_PRECISION5 = 'F5'  # 1.11111
 
     # sample rate (S) Sampling Rate/Buffer Size – set these values to control
     # the sample rate of the module. This setting influences the output data
@@ -313,6 +313,9 @@ class OPS241Radar:
             self.command(Command.SET_OUTPUT_JSON_ON)
         if self.metric:
             self.command(Command.SET_SPEED_UNITS_METERS_PER_SECOND)
+
+        self.command(Command.SET_OUTPUT_MAGNITUDE_ON)
+        self.command(Command.SET_OUTPUT_MAGNITUDE_ON)
 
     def command(self, command, kwargs={}):
         """send command to the OPS-241A module """

@@ -1,6 +1,6 @@
 # OmniPreSense OPS241 Radar driver
 
-![OPS241a](docs/pics/ops241a.jpg)
+![OPS241a](docs/pics/OPS241a.png)
 
 A tool to configure the OmniPreSense OPS241 Radar unit.
 

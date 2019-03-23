@@ -2,13 +2,30 @@
 
 ![OPS241a](docs/pics/OPS241a.png)
 
-A tool to configure the OmniPreSense OPS241 Radar unit.
+A library and tool to configure and use the OmniPreSense OPS241 Radar unit.
 
 The OPS241-A is complete short-range radar sensor providing motion detection, speed, and direction reporting.
 All radar signal processing is done on board and a simple API reports the processed data. Flexible control
 over the reporting format, sample rate, and module power levels is provided.
 
 This tool makes use of the API to configure the radar unit and to display dataflow from it.
+
+# Library usage
+
+This library provides `OPS241Radar` class:
+
+``` python
+from ops241.radar import OPS241Radar
+
+with OPS241Radar() as radar:
+    print(radar.get_module_information())
+    while True:
+        data = radar.read()
+        if len(data) > 0:
+            print(data)
+
+```
+
 
 ## ops241-radar usage
 

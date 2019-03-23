@@ -273,8 +273,15 @@ class Command:
 class OPS241Radar:
     """A OPS241 Radar unit"""
 
-    def __init__(self, port='/dev/ttyACM0'):
+    def __init__(
+        self,
+        port='/dev/ttyACM0',
+        json_format=True,
+        metric=True,
+    ):
         self.port = port
+        self.json_format = json_format
+        self.metric = metric
         self.ser = None  # the serial port
 
     def reset(self):
@@ -302,30 +309,23 @@ class OPS241Radar:
             timeout=0.01,
             writeTimeout=2,
         )
+        if self.json_format:
+            self.command(Command.SET_OUTPUT_JSON_ON)
+        if self.metric:
+            self.command(Command.SET_SPEED_UNITS_METERS_PER_SECOND)
 
-    def send(self, name, command):
+    def command(self, command, kwargs={}):
         """send command to the OPS-241A module """
 
-        print(name, command)
-        data_for_send_bytes = str.encode(command)
-        self.ser.write(data_for_send_bytes)
-
-        # Initialize message verify checking
-        ser_message_start = '{'
-        ser_write_verify = False
-
-        # Print out module response to command string
-        while not ser_write_verify:
-            data_rx_bytes = self.ser.readline()
-            data_rx_length = len(data_rx_bytes)
-            if (data_rx_length != 0):
-                data_rx_str = str(data_rx_bytes)
-                if data_rx_str.find(ser_message_start):
-                    ser_write_verify = True
+        cmd = str.encode(command.format(**kwargs))
+        self.ser.write(cmd)
 
     def read(self):
         data = self.ser.readline()
         return data.decode(encoding='ascii', errors='strict').strip()
+
+    def get_module_information(self):
+        self.command(Command.GET_MODULE_INFORMATION)
 
     def __enter__(self):
         self.reset()
@@ -338,6 +338,7 @@ class OPS241Radar:
 
 if __name__ == '__main__':
     with OPS241Radar() as radar:
+        print(radar.get_module_information())
         while True:
             data = radar.read()
             if len(data) > 0:

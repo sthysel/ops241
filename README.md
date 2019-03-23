@@ -1,6 +1,14 @@
 # OmniPreSense OPS241 Radar driver
 
+![OPS241](docs/pics/ops241.jpg)
+
 A tool to configure the OmniPreSense OPS241 Radar unit.
+
+The OPS241-A is complete short-range radar sensor providing motion detection, speed, and direction reporting.
+All radar signal processing is done on board and a simple API reports the processed data. Flexible control
+over the reporting format, sample rate, and module power levels is provided.
+
+This tool makes use of the API to configure the radar unit and to display dataflow from it.
 
 ## ops241-radar usage
 
@@ -44,4 +52,12 @@ Options:
 {"magnitude":"161.28","speed":"-0.25","distance":"0.00"}
 {"magnitude":"108.46","speed":"-0.65","distance":"0.00"}
 {"magnitude":"418.98","speed":"-0.85","distance":"0.00"}
+```
+
+## Manual Install
+
+Clone this repo and do
+
+```
+$ pip install .
 ```

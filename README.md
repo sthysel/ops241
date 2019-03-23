@@ -198,6 +198,16 @@ $ ops241 watch
 {"magnitude":"418.98","speed":"-0.85","distance":"0.00"}
 ```
 
+
+## Install
+
+`ops241` is available in pypi:
+
+```
+$ pip install ops241-radar
+```
+
+
 ## Manual Install
 
 Clone this repo and do

@@ -28,8 +28,8 @@ class Command:
     # or above the number n will not be reported. This command requires a
     # return after the number. Direction filter allows reporting only a single
     # direction or both.
-    SET_SPEED_REPORT_MINIMUM = f'R>{speed}'
-    SET_SPEED_REPORT_MAXIMUM = f'R<{speed}'
+    SET_SPEED_REPORT_MINIMUM = 'R>{speed}'
+    SET_SPEED_REPORT_MAXIMUM = 'R<{speed}'
     SET_SPEED_REPORT_INBOUND_DIRECTION_ONLY = 'R+'
     SET_SPEED_REPORT_OUTBOUND_DIRECTION_ONLY = 'R-'
     SET_SPEED_REPORT_CLEAR_DIRECTION_CONTROL = 'R|'
@@ -75,7 +75,7 @@ class Command:
     # the jump in values. Writing ?F will provide the current transmitter
     # output frequency.
     GET_TX_FREQUENCY = '?F'  # the output frequency of the transmitter in GHz.
-    SET_TX_FREQUENCY = f'T={n}'
+    SET_TX_FREQUENCY = 'T={n}'
 
     # data output (O)
     # Results from the FFT processing of each buffer will be sent. Each buffer
@@ -98,7 +98,7 @@ class Command:
 
     # Define how many reports to provide. n is a number between 1 and 9. The
     # number n applies to magnitude and speed reports.
-    SET_OUTPUT_REPORT_NUMBER = f'O{n}'
+    SET_OUTPUT_REPORT_NUMBER = 'O{n}'
 
     # Turn on reporting of the magnitude associated with the speed. The
     # magnitude is a measure of the size, distance, and reflectivity of the
@@ -146,6 +146,128 @@ class Command:
     # mask out others.
     SET_MOTION_INTERRUPT_ON = 'IG'
     SET_MOTION_INTERRUPT_OFF = 'Ig'
+
+    # Clock (C)
+    # Clock – set to control the reporting of the time. The time is measured in
+    # seconds/milliseconds from power on of the module. Use the OTcommand to report
+    # the time in seconds and milliseconds. When the module is put in low power state
+    # (PI), the clock will continue counting. If you wish for the module to provide
+    # “the real time”, then set it to “the Unix Epoch time” (see
+    # wikipedia.org/wiki/Unix_time).
+    GET_QUERY_TIME = 'C?'
+    RESET_CLOCK = 'C={n}'
+
+    # Operating mode (P)
+    # Module/TransmitPower – set to control the operating mode (PA, PI, PP) or
+    # the transmit power. The typical maximum transmit power is 9 dB. Reducing
+    # the transmit power does not reduce the overall power consumption of the
+    # module. Note that the detection range will decrease with decreased transmit
+    # power.
+    SET_POWER_MODE_ACTIVE = 'PA'
+    # No activity, waits for Active Power command. The RF is powered down for
+    # further power savings
+    SET_POWER_MODE_IDLE = 'PI'
+    # Use this mode to capture and process a single buffer of data. The module
+    # will stay in PP mode until either a PA or PI command is given. While in
+    # PP mode, the RF device is powered off to save power.
+    SET_POWER_MODE_SINGLE_SHOT = 'PP'
+    SET_POWER_MODE_7 = 'P7'  # Transmit is set at -9 dB below max power
+    SET_POWER_MODE_MIN = 'P7'  # Transmit is set at -9 dB below max power
+    SET_POWER_MODE_6 = 'P6'  # Transmit is set at -6 dB below max power.
+    SET_POWER_MODE_5 = 'P5'  # Transmit is set at -4 dB below max power.
+    SET_POWER_MODE_4 = 'P4'  # Transmit is set at -2.5 dB below max power.
+    SET_POWER_MODE_3 = 'P3'  # Transmit is set at -1.4 dB below max power.
+    SET_POWER_MODE_MID = 'PD'  # PD has additional “overdrive” of 0.2 dB when utilized
+    SET_POWER_MODE_2 = 'P2'  # Transmit is set at -0.8 dB below max power.
+    SET_POWER_MODE_1 = 'P1'  # Transmit is set at -0.4 dB below max power.
+    SET_POWER_MODE_0 = 'P0'  # Transmit power is set at its maximum value with maximum range
+    SET_POWER_MODE_MAX = 'PX'  # PX has additional “overdrive” of 0.2 dB when utilized.
+    SET_POWER_MODE_SYSTEM_RESET = 'P!'
+    # Turn transmit off and put in sensor in receive only mode. Use P! to turn transmit back on
+    SET_POWER_MODE_TX_OFF = 'PO'
+
+    # Duty cycle (Z)
+    # Duty Cycle Control – set to control the duty cycle operation. The time
+    # set is the amount of time the module will sleep between transmit/receive
+    # pulses and processing. During the sleep time the orange LED will be on.
+    # For settings longer than 1 second, the RF will be powered off to save
+    # power. In this manner, lower power operation may be achieved.
+    SET_DUTY_CYCLE_NORMAL = 'Z0'  # Use to set back to normal operation.
+    SET_DUTY_CYCLE_0 = SET_DUTY_CYCLE_NORMAL
+    SET_DUTY_CYCLE_1S = 'ZI'
+    SET_DUTY_CYCLE_5S = 'ZV'
+    SET_DUTY_CYCLE_10 = 'ZX'
+    SET_DUTY_CYCLE_50 = 'ZL'
+    SET_DUTY_CYCLE_100 = 'ZC'
+    SET_DUTY_CYCLE_200S = 'Z2'
+    # Set the amount of time to sleep between data processing. Ex., n = 5 would
+    # set the module to sleep for 5 seconds (RF powered off) between a
+    # transmit/receive pulse and processing
+    SET_DUTY_CYCLE = 'Z={n}'
+
+    # magnitude (M)
+    # Magnitude Control – provides control over the sensitivity of the module to
+    # detect moving objects. Low numbers are most sensitive, high numbers are
+    # least sensitive. Magnitude is related to Squelch as the square root of the
+    # number. For example, a magnitude setting of 10 is equal to a Squelch
+    # setting of 100 (QI).
+
+    # n is any number upon which no detected magnitudes below that number will
+    # be reported. M>0 resets to no limit
+    SET_MAGNITUDE_LOW = f'M>n'
+    SET_MAGNITUDE_LOW_NO_LIMIT = 'M>0'
+    # n is any number upon which no detected magnitudes above that number will
+    # be reported. M>0 resets to no limit
+    SET_MAGNITUDE_HIGH = f'M<n'
+    SET_MAGNITUDE_LOW_NO_LIMIT = 'M<0'
+
+    # Squelch Control (Q)
+    # Squelch Control – provides control over the sensitivity of the module to detect moving objects. Low
+    # numbers are most sensitive, high numbers are least sensitive. Squelch setting numbers are related to
+    # magnitude as the square of the magnitude. For example, squelch setting of 100 (QI) will report only
+    # signals with magnitude ≥ 10.
+    SET_SQUELCH_100 = 'QI'  # Default setting, very high sensitivity
+    SET_SQUELCH_500 = 'QV'
+    SET_SQUELCH_1000 = 'QX'
+    SET_SQUELCH_5000 = 'QL'
+
+    # Set n to the desired squelch number x 10,000. For example, setting to Q2
+    # will set the value to 20,000. Valid values of n are 0-6. 0 provides no
+    # squelch control and all data will be reported.
+    SET_SQUELCH_10000 = 'QC'
+    SET_SQUELCH_10000 = 'Q1'
+    SET_SQUELCH_20000 = 'Q2'
+    SET_SQUELCH_30000 = 'Q3'
+    SET_SQUELCH_40000 = 'Q4'
+    SET_SQUELCH_50000 = 'Q5'
+    SET_SQUELCH_60000 = 'Q6'
+
+    # n = any arbitrary number between 1 (most sensitive) and 65,536.
+    SET_SQUELCH_n = 'Q={n}'
+    # n is any number upon which no detected magnitudes below that number will be
+    # reported. Q>0 resets to no limit.
+    SET_SQUELCH_LOW = 'Q>{n}'
+    SET_SQUELCH_LOW_NO_LIMIT = 'Q>0'
+    # n is any number upon which no detected magnitudes above that number will be
+    # reported. Q<0 resets to no limit.
+    SET_SQUELCH_HIGH = 'Q<{n}'
+    SET_SQUELCH_HIGH_NO_LIMIT = 'Q<0'
+
+    # Persistent Memory (A)
+    # Persistent Memory – saves current configuration into flash memory and is
+    # retained even if power is removed.
+
+    # Saves current configuration settings in flash memory. Upon power loss or
+    # recycling power, the saved configurations will be used as the default
+    SET_CONFIG = 'A!'
+    GET_CONFIG = 'A.'
+    RESET_CONFIG = 'AX'
+
+    # Debug Modes – provides debug information about the module.
+    SET_RED_LED_ON = 'DR'
+    SET_RED_LED_OFF = 'Dr'
+    SET_YELLOW_LED_ON = 'YR'
+    SET_YELLOW_LED_OFF = 'Yr'
 
 
 class OPS241Radar:

@@ -1,0 +1,12 @@
+-r requirements.txt
+tox
+pytest
+bumpversion
+
+flake8
+twine
+autopep8
+yapf
+
+importmagic
+epc

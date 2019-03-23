@@ -1,13 +1,7 @@
 #!/usr/bin/env python
 
-import serial
-import os
-import sys
-import time
-from decimal import *
-import re
 import pygame
-from pygame.locals import *
+import serial
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)

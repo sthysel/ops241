@@ -1,8 +1,9 @@
 """
 A OmniPreSense OPS241 radar
 """
-import sys
 import json
+import sys
+import time
 
 import serial
 from serial.serialutil import SerialException
@@ -152,7 +153,7 @@ class Command:
 
     # Clock (C)
     # Clock – set to control the reporting of the time. The time is measured in
-    # seconds/milliseconds from power on of the module. Use the OTcommand to report
+    # seconds/milliseconds from power on of the module. Use the OT command to report
     # the time in seconds and milliseconds. When the module is put in low power state
     # (PI), the clock will continue counting. If you wish for the module to provide
     # “the real time”, then set it to “the Unix Epoch time” (see
@@ -237,7 +238,6 @@ class Command:
     # Set n to the desired squelch number x 10,000. For example, setting to Q2
     # will set the value to 20,000. Valid values of n are 0-6. 0 provides no
     # squelch control and all data will be reported.
-    SET_SQUELCH_10000 = 'QC'
     SET_SQUELCH_10000 = 'Q1'
     SET_SQUELCH_20000 = 'Q2'
     SET_SQUELCH_30000 = 'Q3'
@@ -331,20 +331,37 @@ class OPS241Radar:
         else:
             self.command(Command.SET_OUTPUT_JSON_OFF)
 
+        self.command(Command.SET_OUTPUT_TIME_ON)
+        # set current time does not seem to work
+        # self.command(Command.RESET_CLOCK, n=int(time.time()))
+
+        self.command(Command.SET_SAMPLE_RATE_20K_PER_SECOND)
         self.command(Command.SET_SPEED_UNITS_METERS_PER_SECOND)
+        self.command(Command.SET_BUFFER_SIZE_1024)
         self.command(Command.SET_OUTPUT_MAGNITUDE_ON)
-        self.command(Command.SET_SAMPLE_RATE_5K_PER_SECOND)
         self.command(Command.SET_POWER_MODE_MID)
 
-    def command(self, command, kwargs={}, verbose=False):
+        self.command('OD')
+
+    def command(self, command, verbose=True, **kwargs):
         """send command to the OPS-241A module """
 
         cmd_st = command.format(**kwargs)
         cmd = str.encode(cmd_st)
         self.ser.write(cmd)
-        res = self.read()
+
+        # read until } before continuing
+        done = False
+        while not done:
+            res = self.read()
+            if res.find('ERROR') > 0:
+                print(res)
+                done = True
+            if res.find('}') > 0:
+                done = True
+
         if verbose:
-            print(f'command result: {res}')
+            print(f'command {cmd_st} result: {res}')
         return res
 
     def read(self):

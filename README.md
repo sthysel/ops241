@@ -31,6 +31,7 @@ with OPS241Radar() as radar:
 
 ```zsh
 $ ops241
+  
 Usage: ops241 [OPTIONS] COMMAND [ARGS]...
 
   OPS241 Radar
@@ -39,13 +40,34 @@ Options:
   --version                    Show the version and exit.
   -p, --port TEXT              TTY Port radar is available at  [default: /dev/ttyACM0]
   -j, --json-format / --plain  JSON Output format  [default: True]
-  -m, --metric TEXT            Use metric units  [default: True]
   --help                       Show this message and exit.
 
 Commands:
-  api    List available API commands
-  ports  List available com ports
-  watch  Watch data stream from radar
+  api           List available API commands
+  factoryreset  Reset to factory settings
+  info          Print current module configuration
+  ports         List available com ports
+  watch         Watch data stream from radar
+  
+```
+
+### information
+
+```zsh
+$ ops241 info
+
+{
+    "Version": "1.3.0",
+    "SamplingRate": 5000,
+    "resolution": 0.0303,
+    "SampleSize": 1024,
+    "Clock": "2154",
+    "Q2COUNT": "1150 (~23000 counts/sec) @t=2154",
+    "PowerMode": "Continuous",
+    "Squelch": "100",
+    "RequiredMinSpeed": "0.000"
+}
+
 ```
 
 ### api commands

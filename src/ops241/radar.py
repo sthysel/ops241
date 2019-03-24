@@ -1,8 +1,11 @@
 """
 A OmniPreSense OPS241 radar
 """
+import sys
+import json
 
 import serial
+from serial.serialutil import SerialException
 
 
 class Command:
@@ -23,7 +26,7 @@ class Command:
     SET_SPEED_UNITS_METERS_PER_SECOND = 'UM'
 
     # speed/direction Reported Speed/Direction Filter– use these settings to
-    # setthe minimum or maximum value or direction to report. Reported speed
+    # set the minimum or maximum value or direction to report. Reported speed
     # can be used to set the sensitivity level of detection. Any values below
     # or above the number n will not be reported. This command requires a
     # return after the number. Direction filter allows reporting only a single
@@ -158,7 +161,7 @@ class Command:
     RESET_CLOCK = 'C={n}'
 
     # Operating mode (P)
-    # Module/TransmitPower – set to control the operating mode (PA, PI, PP) or
+    # Module/Transmit Power – set to control the operating mode (PA, PI, PP) or
     # the transmit power. The typical maximum transmit power is 9 dB. Reducing
     # the transmit power does not reduce the overall power consumption of the
     # module. Note that the detection range will decrease with decreased transmit
@@ -277,12 +280,26 @@ class OPS241Radar:
         self,
         port='/dev/ttyACM0',
         json_format=True,
-        metric=True,
     ):
         self.port = port
         self.json_format = json_format
-        self.metric = metric
         self.ser = None  # the serial port
+        self.test_port()
+
+    def test_port(self):
+        try:
+            serial.Serial(
+                port=self.port,
+                baudrate=9600,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
+                bytesize=serial.EIGHTBITS,
+                timeout=1,
+                writeTimeout=2,
+            )
+        except SerialException as e:
+            print(e)
+            sys.exit()
 
     def reset(self):
         """Initialize the USB port to read from the OPS-241A module """
@@ -311,24 +328,45 @@ class OPS241Radar:
         )
         if self.json_format:
             self.command(Command.SET_OUTPUT_JSON_ON)
-        if self.metric:
-            self.command(Command.SET_SPEED_UNITS_METERS_PER_SECOND)
+        else:
+            self.command(Command.SET_OUTPUT_JSON_OFF)
 
+        self.command(Command.SET_SPEED_UNITS_METERS_PER_SECOND)
         self.command(Command.SET_OUTPUT_MAGNITUDE_ON)
-        self.command(Command.SET_OUTPUT_MAGNITUDE_ON)
+        self.command(Command.SET_SAMPLE_RATE_5K_PER_SECOND)
+        self.command(Command.SET_POWER_MODE_MID)
 
-    def command(self, command, kwargs={}):
+    def command(self, command, kwargs={}, verbose=False):
         """send command to the OPS-241A module """
 
-        cmd = str.encode(command.format(**kwargs))
+        cmd_st = command.format(**kwargs)
+        cmd = str.encode(cmd_st)
         self.ser.write(cmd)
+        res = self.read()
+        if verbose:
+            print(f'command result: {res}')
+        return res
 
     def read(self):
         data = self.ser.readline()
         return data.decode(encoding='ascii', errors='strict').strip()
 
     def get_module_information(self):
+        """sends the info command and read all expected return values"""
         self.command(Command.GET_MODULE_INFORMATION)
+
+        got_all = False
+        res = []
+        while not got_all:
+            info = self.read()
+            res.append(json.loads(info))
+            if info.find('RequiredMinSpeed') > 0:
+                got_all = True
+        return {k: v for d in res for k, v in d.items()}
+
+    def factory_reset(self):
+        """reset config to factory settings"""
+        self.command(Command.RESET_CONFIG)
 
     def __enter__(self):
         self.reset()

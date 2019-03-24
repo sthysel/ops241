@@ -1,7 +1,7 @@
 from .radar import OPS241Radar, Command
 import serial.tools.list_ports
-from serial.serialutil import SerialException
 import click
+import json
 
 
 class RadarConfig(object):
@@ -28,21 +28,27 @@ radar_config = click.make_pass_decorator(RadarConfig, ensure=True)
     default=True,
     show_default=True,
 )
-@click.option(
-    '-m',
-    '--metric',
-    help='Use metric units',
-    default=True,
-    show_default=True,
-)
 @radar_config
-def cli(config, port, json_format, metric):
+def cli(config, port, json_format):
     """
     OPS241 Radar
     """
     config.port = port
     config.json_format = json_format
-    config.metric = metric
+
+
+@cli.command('factoryreset')
+@radar_config
+def factory_reset(config):
+    """Reset to factory settings"""
+
+    with OPS241Radar(
+        port=config.port,
+        json_format=config.json_format,
+        metric=config.metric,
+    ) as radar:
+        radar.factory_reset()
+    print('Done')
 
 
 @cli.command('ports')
@@ -80,10 +86,23 @@ def watch(config):
     with OPS241Radar(
         port=config.port,
         json_format=config.json_format,
-        metric=config.metric,
     ) as radar:
-        print(radar.get_module_information())
+        info = radar.get_module_information()
+        print(info)
         while True:
             data = radar.read()
             if len(data) > 0:
                 print(data)
+
+
+@cli.command('info')
+@radar_config
+def info(config):
+    """Print current module configuration"""
+
+    with OPS241Radar(
+        port=config.port,
+        json_format=config.json_format,
+    ) as radar:
+        info = radar.get_module_information()
+        print(json.dumps(info, indent=4))

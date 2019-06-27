@@ -21,7 +21,6 @@ setup(
     },
     install_requires=[
         'click',
-        'pygame',
         'pyserial',
     ],
     author='sthysel',

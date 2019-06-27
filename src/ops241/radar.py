@@ -394,7 +394,7 @@ class OPS241Radar:
             if info.find('RequiredMinSpeed') > 0:
                 got_all = True
 
-        return info_msg({k: v for d in res for k, v in d.items()})
+        return msg({k: v for d in res for k, v in d.items()})
 
     def factory_reset(self):
         """reset config to factory settings"""

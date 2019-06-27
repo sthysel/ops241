@@ -1,7 +1,10 @@
-from .radar import OPS241Radar, Command
-import serial.tools.list_ports
-import click
 import json
+
+import click
+
+import serial.tools.list_ports
+
+from .radar import Command, OPS241Radar
 
 
 class RadarConfig(object):
@@ -105,4 +108,4 @@ def info(config):
         json_format=config.json_format,
     ) as radar:
         info = radar.get_module_information()
-        print(json.dumps(info, indent=4))
+        print(info)

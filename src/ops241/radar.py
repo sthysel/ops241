@@ -8,6 +8,8 @@ import time
 import serial
 from serial.serialutil import SerialException
 
+from .messages import msg
+
 
 class Command:
     # board info (?)
@@ -315,16 +317,28 @@ class OPS241Radar:
         ser.flushInput()
         ser.flushOutput()
 
-    def initialize(self):
-        """connect """
+    def initialize(
+        self,
+        timeout: float = 0.01,
+        write_timeout: float = 2.0,
+        port: str = '/dev/ttyACM0',
+    ):
+        """
+        Connect to Radar device
+
+        - Arguments:
+            - timeout: float, connection timeout
+            - write_timeout: float, write timeout
+            - port: str, USB port name
+        """
         self.ser = serial.Serial(
-            port='/dev/ttyACM0',
+            port=port,
             baudrate=9600,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
             bytesize=serial.EIGHTBITS,
-            timeout=0.01,
-            writeTimeout=2,
+            timeout=timeout,
+            writeTimeout=write_timeout,
         )
         if self.json_format:
             self.command(Command.SET_OUTPUT_JSON_ON)
@@ -379,7 +393,8 @@ class OPS241Radar:
             res.append(json.loads(info))
             if info.find('RequiredMinSpeed') > 0:
                 got_all = True
-        return {k: v for d in res for k, v in d.items()}
+
+        return info_msg({k: v for d in res for k, v in d.items()})
 
     def factory_reset(self):
         """reset config to factory settings"""

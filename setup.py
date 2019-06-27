@@ -10,7 +10,7 @@ with open('README.md', 'r') as f:
 setup(
     name='ops241-radar',
     license='MIT',
-    version='0.0.3',
+    version='0.0.4',
     description='OPS241 Radar',
     long_description=long_description,
     long_description_content_type='text/markdown',

@@ -1,4 +1,4 @@
-# OmniPreSense OPS241 Radar driver (Version 0.0.3)
+# OmniPreSense OPS241 Radar driver (Version 0.0.4)
 
 ![OPS241a](docs/pics/OPS241a.png)
 

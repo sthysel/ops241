@@ -2,6 +2,7 @@
 A OmniPreSense OPS241 radar
 """
 import json
+import logging
 import sys
 import time
 
@@ -10,8 +11,14 @@ from serial.serialutil import SerialException
 
 from .messages import msg
 
+logger = logging.getLogger(__name__)
+
 
 class Command:
+    """
+    OPS241 Command set
+    """
+
     # board info (?)
     GET_MODULE_INFORMATION = '??'
     GET_RESET_REASON = '?R'
@@ -280,11 +287,25 @@ class OPS241Radar:
 
     def __init__(
         self,
-        port='/dev/ttyACM0',
-        json_format=True,
+        port: str = '/dev/ttyACM0',
+        timeout: float = 0.01,
+        write_timeout: float = 2.0,
+        json_format=False,
     ):
+        """
+        OPS241 Radar
+
+        - Arguments:
+            - timeout: float, connection timeout
+            - write_timeout: float, write timeout
+            - port: str, USB port name
+        """
+
         self.port = port
+        self.timeout = timeout
+        self.write_timeout = write_timeout
         self.json_format = json_format
+
         self.ser = None  # the serial port
         self.test_port()
 
@@ -300,7 +321,7 @@ class OPS241Radar:
                 writeTimeout=2,
             )
         except SerialException as e:
-            print(e)
+            logger.exception(e)
             sys.exit()
 
     def reset(self):
@@ -317,28 +338,15 @@ class OPS241Radar:
         ser.flushInput()
         ser.flushOutput()
 
-    def initialize(
-        self,
-        timeout: float = 0.01,
-        write_timeout: float = 2.0,
-        port: str = '/dev/ttyACM0',
-    ):
-        """
-        Connect to Radar device
-
-        - Arguments:
-            - timeout: float, connection timeout
-            - write_timeout: float, write timeout
-            - port: str, USB port name
-        """
+    def initialize(self, ):
         self.ser = serial.Serial(
-            port=port,
+            port=self.port,
             baudrate=9600,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
             bytesize=serial.EIGHTBITS,
-            timeout=timeout,
-            writeTimeout=write_timeout,
+            timeout=self.timeout,
+            writeTimeout=self.write_timeout,
         )
         if self.json_format:
             self.command(Command.SET_OUTPUT_JSON_ON)
@@ -357,8 +365,15 @@ class OPS241Radar:
 
         self.command('OD')
 
-    def command(self, command, verbose=True, **kwargs):
-        """send command to the OPS-241A module """
+    def command(
+        self,
+        command,
+        verbose=True,
+        **kwargs,
+    ):
+        """
+        Send command to the OPS-241A module
+        """
 
         cmd_st = command.format(**kwargs)
         cmd = str.encode(cmd_st)
@@ -369,7 +384,7 @@ class OPS241Radar:
         while not done:
             res = self.read()
             if res.find('ERROR') > 0:
-                print(res)
+                logger.error(res)
                 done = True
             if res.find('}') > 0:
                 done = True

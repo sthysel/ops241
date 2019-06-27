@@ -90,8 +90,6 @@ def watch(config):
         port=config.port,
         json_format=config.json_format,
     ) as radar:
-        info = radar.get_module_information()
-        print(info)
         while True:
             data = radar.read()
             if len(data) > 0:

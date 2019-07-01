@@ -22,6 +22,7 @@ setup(
     install_requires=[
         'click',
         'pyserial',
+        'paho-mqtt',
     ],
     author='sthysel',
     author_email='sthysel@gmail.com',

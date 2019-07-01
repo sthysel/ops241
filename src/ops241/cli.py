@@ -1,7 +1,9 @@
 import json
+import logging
 
 import click
 
+import paho.mqtt.client as mqtt
 import serial.tools.list_ports
 
 from .radar import Command, OPS241Radar
@@ -11,6 +13,8 @@ class RadarConfig(object):
     def __init__(self):
         pass
 
+
+logging.basicConfig(level=logging.DEBUG)
 
 radar_config = click.make_pass_decorator(RadarConfig, ensure=True)
 
@@ -24,32 +28,20 @@ radar_config = click.make_pass_decorator(RadarConfig, ensure=True)
     default='/dev/ttyACM0',
     show_default=True,
 )
-@click.option(
-    '-j',
-    '--json-format/--plain',
-    help='JSON Output format',
-    default=True,
-    show_default=True,
-)
 @radar_config
-def cli(config, port, json_format):
+def cli(config, port):
     """
     OPS241 Radar
     """
     config.port = port
-    config.json_format = json_format
 
 
-@cli.command('factoryreset')
+@cli.command('factory-reset')
 @radar_config
 def factory_reset(config):
     """Reset to factory settings"""
 
-    with OPS241Radar(
-        port=config.port,
-        json_format=config.json_format,
-        metric=config.metric,
-    ) as radar:
+    with OPS241Radar(port=config.port, ) as radar:
         radar.factory_reset()
     print('Done')
 
@@ -86,10 +78,9 @@ def api(config):
 def watch(config):
     """Watch data stream from radar"""
 
-    with OPS241Radar(
-        port=config.port,
-        json_format=config.json_format,
-    ) as radar:
+    print('Reading Radar data')
+    with OPS241Radar(port=config.port) as radar:
+        radar.initialize()
         while True:
             data = radar.read()
             if len(data) > 0:
@@ -101,9 +92,7 @@ def watch(config):
 def info(config):
     """Print current module configuration"""
 
-    with OPS241Radar(
-        port=config.port,
-        json_format=config.json_format,
-    ) as radar:
+    print('Reading Radar module information')
+    with OPS241Radar(port=config.port, ) as radar:
         info = radar.get_module_information()
         print(info)

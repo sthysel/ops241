@@ -290,7 +290,6 @@ class OPS241Radar:
         port: str = '/dev/ttyACM0',
         timeout: float = 0.01,
         write_timeout: float = 2.0,
-        json_format=False,
     ):
         """
         OPS241 Radar
@@ -304,14 +303,12 @@ class OPS241Radar:
         self.port = port
         self.timeout = timeout
         self.write_timeout = write_timeout
-        self.json_format = json_format
 
-        self.ser = None  # the serial port
-        self.test_port()
+        self.ser = self.set_serial_port()
 
-    def test_port(self):
+    def set_serial_port(self):
         try:
-            serial.Serial(
+            return serial.Serial(
                 port=self.port,
                 baudrate=9600,
                 parity=serial.PARITY_NONE,
@@ -324,46 +321,17 @@ class OPS241Radar:
             logger.exception(e)
             sys.exit()
 
-    def reset(self):
-        """Initialize the USB port to read from the OPS-241A module """
-        ser = serial.Serial(
-            port=self.port,
-            baudrate=9600,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
-            bytesize=serial.EIGHTBITS,
-            timeout=1,
-            writeTimeout=2,
-        )
-        ser.flushInput()
-        ser.flushOutput()
-
-    def initialize(self, ):
-        self.ser = serial.Serial(
-            port=self.port,
-            baudrate=9600,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
-            bytesize=serial.EIGHTBITS,
-            timeout=self.timeout,
-            writeTimeout=self.write_timeout,
-        )
-        if self.json_format:
-            self.command(Command.SET_OUTPUT_JSON_ON)
-        else:
-            self.command(Command.SET_OUTPUT_JSON_OFF)
-
+    def initialize(self):
+        """
+        set module defaults
+        """
+        logger.debug('Setting module defaults')
+        self.command(Command.SET_POWER_MODE_MID)
+        self.command(Command.SET_OUTPUT_MAGNITUDE_ON)
         self.command(Command.SET_OUTPUT_TIME_ON)
-        # set current time does not seem to work
-        # self.command(Command.RESET_CLOCK, n=int(time.time()))
-
         self.command(Command.SET_SAMPLE_RATE_20K_PER_SECOND)
         self.command(Command.SET_SPEED_UNITS_METERS_PER_SECOND)
         self.command(Command.SET_BUFFER_SIZE_1024)
-        self.command(Command.SET_OUTPUT_MAGNITUDE_ON)
-        self.command(Command.SET_POWER_MODE_MID)
-
-        self.command('OD')
 
     def command(
         self,
@@ -379,35 +347,48 @@ class OPS241Radar:
         cmd = str.encode(cmd_st)
         self.ser.write(cmd)
 
-        # read until } before continuing
+        write_token = '{'
+        # read until write_token is received before continuing
         done = False
         while not done:
             res = self.read()
-            if res.find('ERROR') > 0:
-                logger.error(res)
-                done = True
-            if res.find('}') > 0:
-                done = True
+            if len(res) != 0:
+                if res.find('ERROR') >= 0:
+                    logger.error(res)
+                if res.find(write_token) >= 0:
+                    done = True
 
         if verbose:
             print(f'command {cmd_st} result: {res}')
         return res
 
-    def read(self):
+    def read(self) -> str:
+        """
+        Read line of text from serial port
+
+        - Returns
+            - line:str
+        """
         data = self.ser.readline()
         return data.decode(encoding='ascii', errors='strict').strip()
 
     def get_module_information(self):
         """sends the info command and read all expected return values"""
+
+        # disable radar so reports don't bother us while getting module info
+        self.command(Command.SET_POWER_MODE_IDLE)
         self.command(Command.GET_MODULE_INFORMATION)
 
-        got_all = False
         res = []
-        while not got_all:
+        while True:
             info = self.read()
-            res.append(json.loads(info))
-            if info.find('RequiredMinSpeed') > 0:
-                got_all = True
+            if len(info) != 0:
+                try:
+                    res.append(json.loads(info))
+                except json.decoder.JSONDecodeError as e:
+                    logger.error(e)
+            else:
+                break
 
         return msg({k: v for d in res for k, v in d.items()})
 
@@ -415,9 +396,13 @@ class OPS241Radar:
         """reset config to factory settings"""
         self.command(Command.RESET_CONFIG)
 
+    def flush(self):
+        """Initialize the USB port to read from the OPS-241A module """
+        self.ser.flushInput()
+        self.ser.flushOutput()
+
     def __enter__(self):
-        self.reset()
-        self.initialize()
+        self.flush()
         return self
 
     def __exit__(self, type, value, traceback):

@@ -10,6 +10,8 @@ over the reporting format, sample rate, and module power levels is provided.
 
 This tool makes use of the API to configure the radar unit and to display dataflow from it.
 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sthysel/ops241/master.svg)](https://results.pre-commit.ci/latest/github/sthysel/ops241/mas
+
 # Library usage
 
 This library provides `OPS241Radar` class:

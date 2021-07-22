@@ -23,7 +23,6 @@ with OPS241Radar() as radar:
         data = radar.read()
         if len(data) > 0:
             print(data)
-
 ```
 
 
@@ -31,7 +30,7 @@ with OPS241Radar() as radar:
 
 ```zsh
 $ ops241
-  
+
 Usage: ops241 [OPTIONS] COMMAND [ARGS]...
 
   OPS241 Radar
@@ -48,7 +47,7 @@ Commands:
   info          Print current module configuration
   ports         List available com ports
   watch         Watch data stream from radar
-  
+
 ```
 
 ### information

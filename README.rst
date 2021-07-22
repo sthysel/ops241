@@ -214,4 +214,3 @@ Clone this repo and do
    $ pip install .
 
 .. |OPS241a| image:: docs/pics/OPS241a.png
-

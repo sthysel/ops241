@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "ops241"
+version = "0.1.0"
+description = "OPS241 Radar driver"
+authors = ["sthysel <sthysel@gmail>"]
+license = "MIT"
+readme = "README.md"
+
+
+packages = [
+    { include = "ops241", from = "src" }
+]
+
+classifiers=[
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: OS Independent',
+    'Development Status :: 4 - Beta',
+    'Operating System :: Unix',
+    'Operating System :: POSIX',
+    'Programming Language :: Python :: 3',
+    'Topic :: Utilities'
+]
+
+
+[tool.poetry.scripts]
+ops241 = "ops241.cli:cli"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pyserial = "^3.5"
+click = "^8.0.1"
+pygame = "^2.0.1"
+paho-mqtt = "^1.5.1"
+
+[tool.poetry.dev-dependencies]
+tox = "^3.24.0"
+pytest = "^6.2.4"
+bumpversion = "^0.6.0"
+flake8 = "^3.9.2"
+autopep8 = "^1.5.7"
+importmagic = "^0.1.7"
+epc = "^0.0.5"
+pre-commit = "^2.13.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

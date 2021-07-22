@@ -5,5 +5,5 @@
     - name: "Install dependencies"
       become: yes
       apt:
-        name: 
+        name:
           - mosquitto

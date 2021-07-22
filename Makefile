@@ -10,6 +10,7 @@ clean-build:
 	rm -fr build/
 	rm -fr dist/
 	rm -fr *.egg-info
+	rm -fr .mypy_cache/
 
 clean-pyc:
 	$(info # Removing pycies artefacts)

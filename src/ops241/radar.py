@@ -399,7 +399,7 @@ class OPS241Radar:
         self.command(Command.RESET_CONFIG)
 
     def flush(self):
-        """Initialize the USB port to read from the OPS-241A module """
+        """Initialize the USB port to read from the OPS-241A module"""
         self.ser.flushInput()
         self.ser.flushOutput()
 
